@@ -9,10 +9,10 @@ import (
 
 type User struct {
 	Base
-	Name     string
-	Email    string
-	Password string
-	Active   bool
+	Name     string `db:"name" gorm:"column:name"`
+	Email    string `db:"email" gorm:"column:email"`
+	Password string `db:"password" gorm:"column:password"`
+	Active   bool   `db:"active" gorm:"column:active"`
 }
 
 func (u *User) validate() error {
