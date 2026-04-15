@@ -22,11 +22,8 @@ func NewCreateUserUseCases(repo repositories.UserRepository, hasher services.Pas
 }
 
 func (uc *CreateUserUseCase) Execute(ctx context.Context, input dto.CreateUserInput) (dto.CreateUserOutput, error) {
-	existingUser, err := uc.userRepository.FindByEmail(ctx, input.Email)
+	existingUser, _ := uc.userRepository.FindByEmail(ctx, input.Email)
 
-	if err != nil {
-		return dto.CreateUserOutput{}, err
-	}
 	if existingUser != nil {
 		return dto.CreateUserOutput{}, domain.ErrEmailAlreadyUsed
 	}

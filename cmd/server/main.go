@@ -18,7 +18,11 @@ func main() {
 		log.Fatal("Não foi possível carregar as configurações:", err)
 	}
 
-	gormDB, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
+	gormDB, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{
+		PrepareStmt:    true,
+		QueryFields:    true,
+		TranslateError: true,
+	})
 	if err != nil {
 		log.Fatal("Falha ao conectar via GORM:", err)
 	}
@@ -28,14 +32,13 @@ func main() {
 
 	di := container.NewDependencyContainer(gormDB, sqlxDB, cfg)
 
-	r := gin.Default()
-
-	web.SetupRoutes(r, web.RouterConfig{
+	gin := gin.Default()
+	web.SetupRoutes(gin, web.RouterConfig{
 		UserHandler: di.UserHandler,
 	})
 
 	log.Printf("Servidor rodando na porta %s...", cfg.ApiServerPort)
-	if err := r.Run(cfg.ApiServerPort); err != nil {
+	if err := gin.Run(cfg.ApiServerPort); err != nil {
 		log.Fatal("Erro ao subir o servidor:", err)
 	}
 

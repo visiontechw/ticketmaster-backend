@@ -33,13 +33,10 @@ func (r *GormUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*domai
 
 func (r *GormUserRepository) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
 	var user domain.User
-	// SELECT * FROM users WHERE email = ? AND deleted_at IS NULL LIMIT 1;
 	err := r.db.WithContext(ctx).Where("email = ?", email).First(&user).Error
-
 	if err != nil {
-		return nil, domain.ErrUserNotFound
+		return nil, err
 	}
-
 	return &user, nil
 }
 
