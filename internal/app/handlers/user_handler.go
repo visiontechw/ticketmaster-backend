@@ -10,14 +10,19 @@ import (
 )
 
 type UserHandler struct {
-	createUserUC *usecases.CreateUserUseCase
-	loginUserUC  *usecases.LoginUseCase
+	createUserUC  *usecases.CreateUserUseCase
+	loginUserUC   *usecases.LoginUseCase
+	getUserByIdUC *usecases.GetUserByIdUseCase
 }
 
 func NewUserHandler(uc *usecases.CreateUserUseCase,
-	loginUC *usecases.LoginUseCase) *UserHandler {
-	return &UserHandler{createUserUC: uc,
-		loginUserUC: loginUC}
+	loginUC *usecases.LoginUseCase,
+	getById *usecases.GetUserByIdUseCase) *UserHandler {
+	return &UserHandler{
+		createUserUC:  uc,
+		loginUserUC:   loginUC,
+		getUserByIdUC: getById,
+	}
 }
 
 func (h *UserHandler) Create(c *gin.Context) {
@@ -38,6 +43,17 @@ func (h *UserHandler) Create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, output)
+}
+
+func (h *UserHandler) Me(c *gin.Context) {
+
+	output, err := h.getUserByIdUC.Execute(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, output)
 }
 
 func (h *UserHandler) Login(c *gin.Context) {

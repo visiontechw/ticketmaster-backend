@@ -10,12 +10,13 @@ import (
 
 type Event struct {
 	Base
-	Name        string
-	Description string
-	OccursAt    time.Time
-	Location    string
-	Capacity    int64
-	OwnerId     uuid.UUID
+	Name        string    `db:"name" gorm:"type:varchar(255);not null"`
+	Description string    `db:"description" gorm:"type:text"`
+	OccursAt    time.Time `db:"occurs_at" gorm:"type:timestamptz;not null;index"`
+	Location    string    `db:"location" gorm:"type:varchar(255)"`
+	Capacity    int64     `db:"capacity" gorm:"not null;default:0"`
+	OwnerId     uuid.UUID `db:"owner_id" gorm:"type:uuid;not null;index"`
+	EventTypeId uuid.UUID `db:"event_type_id" gorm:"type:uuid;not null;index"`
 }
 
 func (e *Event) validate() error {
@@ -23,6 +24,11 @@ func (e *Event) validate() error {
 	if e.OwnerId == uuid.Nil {
 		return errors.New("owner id is required")
 	}
+
+	if e.EventTypeId == uuid.Nil {
+		return errors.New("EventTypeId is required")
+	}
+
 	if strings.TrimSpace(e.Name) == "" {
 		return errors.New("event name is required")
 	}
@@ -43,7 +49,7 @@ func (e *Event) validate() error {
 	return nil
 }
 
-func NewEvent(ownerId uuid.UUID, name, description, location string, capacity int64, occursAt time.Time) (*Event, error) {
+func NewEvent(ownerId, eventType uuid.UUID, name, description, location string, capacity int64, occursAt time.Time) (*Event, error) {
 	event := &Event{
 		Base:        NewBase(),
 		Name:        strings.TrimSpace(name),
@@ -52,6 +58,7 @@ func NewEvent(ownerId uuid.UUID, name, description, location string, capacity in
 		Capacity:    capacity,
 		OccursAt:    occursAt,
 		OwnerId:     ownerId,
+		EventTypeId: eventType,
 	}
 
 	if err := event.validate(); err != nil {

@@ -3,16 +3,18 @@ package web
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/visiontechw/ticketmaster/internal/app/handlers"
+	"github.com/visiontechw/ticketmaster/internal/app/middleware"
+	"github.com/visiontechw/ticketmaster/internal/domain/services"
 )
 
 // RouterConfig centraliza todos os handlers para facilitar a injeção
 type RouterConfig struct {
-	UserHandler *handlers.UserHandler
-	// EventHandler *EventHandler (Adicione conforme criar novos)
+	UserHandler  *handlers.UserHandler
+	EventHandler *handlers.EventHandler
+	TokenManager services.TokenManager
 }
 
 func SetupRoutes(r *gin.Engine, config RouterConfig) {
-	// Middleware Global (Ex: Logger, Recovery, CORS)
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 
@@ -23,20 +25,37 @@ func SetupRoutes(r *gin.Engine, config RouterConfig) {
 
 	api := r.Group("/api")
 	{
-		// Rotas de Usuário
+		// Rotas Públicas (Auth)
 		auth := api.Group("/auth")
 		{
-			// Registro de novo usuário
 			auth.POST("/register", config.UserHandler.Create)
-
-			// Login: recebe email/senha e retorna o Token JWT
 			auth.POST("/login", config.UserHandler.Login)
 		}
 
-		// Espaço para as próximas rotas:
-		// events := api.Group("/events")
-		// {
-		//     events.GET("/", config.EventHandler.List)
-		// }
+		// Rotas Públicas (Events)
+		publicEvents := api.Group("/events")
+		{
+			publicEvents.GET("/", config.EventHandler.ListEvents)
+			publicEvents.GET("/:id", config.EventHandler.GetById)
+		}
+
+		// --- GRUPO PROTEGIDO ---
+		protected := api.Group("/")
+		protected.Use(middleware.TokenCatcherMiddleware(config.TokenManager))
+		{
+			// 1. Rota de Perfil do Usuário (Adicionada aqui)
+			user := protected.Group("/user")
+			{
+				user.GET("/profile", config.UserHandler.Me)
+			}
+
+			// 2. Rotas de Admin/Eventos protegidos
+			adminEvents := protected.Group("/events")
+			{
+				adminEvents.POST("/", config.EventHandler.Create)
+				adminEvents.PUT("/:id", config.EventHandler.Update)
+				adminEvents.DELETE("/:id", config.EventHandler.Delete)
+			}
+		}
 	}
 }

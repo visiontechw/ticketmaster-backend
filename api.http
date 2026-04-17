@@ -1,3 +1,5 @@
+@baseUrl = http://localhost:3001/api
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZGU4OGQyNmYtYTY1ZC00MTkwLTg1ZGItYmFjYjI5Y2FjZTViIiwiZW1haWwiOiJyZW5hdG9AZXhlbXBsby5jb20uYnIiLCJpc3MiOiJ0aWNrZXRmYWNpbC1hcGkiLCJzdWIiOiJkZTg4ZDI2Zi1hNjVkLTQxOTAtODVkYi1iYWNiMjljYWNlNWIiLCJleHAiOjE3NzYzNTMwMDIsImlhdCI6MTc3NjM0OTQwMn0.JksyjkumTIFPTdT97sA8FT5MQKNx0ShwL1M-nZWjxe0
 GET http://localhost:3001/health HTTP/1.1
 
 
@@ -21,3 +23,25 @@ Accept: application/json
   "password": "s3nh4!!"
 }
 
+###
+GET http://localhost:3001/api/events?active=true HTTP/1.1
+Content-Type: application/json
+
+###
+GET http://localhost:3001/api/events/ee39e5e2-2188-4d5f-b1d3-df997a668e16 HTTP/1.1
+Content-Type: application/json
+
+
+### Criar um novo evento
+POST {{baseUrl}}/events
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "name": "Grande Show de Rock",
+    "description": "Um evento imperdível com as melhores bandas da região.",
+    "occurs_at": "2026-12-25T20:00:00Z",
+    "location": "Arena Central, São Paulo",
+    "capacity": 5000,
+    "event_type_id": "6876808b-9a2f-4b27-9e45-72f22ac2fa3e"
+}

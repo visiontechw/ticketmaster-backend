@@ -371,5 +371,10 @@ Desenvolvido por **VisioNTech Workspace**
 
 **Última atualização:** Abril de 2026
 
+migrate create -ext sql -dir db/migrations -seq nome_migrate
 
 migrate -path db/migrations -database "postgres://dev:local%21%21dev@127.0.0.1:5432/ticketfacil?sslmode=disable" up
+
+
+
+
